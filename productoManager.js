@@ -1,18 +1,16 @@
 const fs = require("fs")
 
-const path = "productos.json"
-
 class ProductManager {
 
     constructor(path) {
-        
+
         this.path = path
     }
 
     getProduct = async () => {
-        if (fs.existsSync(path)) {
-            const infoProduct = await fs.promises.readFile(path, "utf-8")
-            const productos = JSON.parse(infoProduct)
+        if (fs.existsSync(this.path)) {
+            const buscarProduct = await fs.promises.readFile(this.path, "utf-8")
+            const productos = JSON.parse(buscarProduct)
             return productos
         } else {
             console.log("no hay archivo");
@@ -23,26 +21,60 @@ class ProductManager {
 
     addProduct = async (producto) => {
         const productos = await this.getProduct()
+        const id = this.#generarId(productos)
+        const nuevoProducto = { id, ...producto }
+        productos.push(nuevoProducto)
+
+        await fs.promises.writeFile(this.path, JSON.stringify(productos))
+        return nuevoProducto
+    }
+
+    getProductoById = async (id) => {
+        const productos = await this.getProduct()
+        const productoId = productos.find(u => u.id === id)
+        if (productoId) {
+            return productoId
+        } else {
+            return "producto no existe"
+        }
+
+
+
+
+    }
+
+    upDateProduc = async () => { }
+
+    delateProduct = async () => {
+        if (fs.existsSync(this.path)) {
+            await fs.promises.unlink(this.path)
+            return "archivo eliminado"
+        } else {
+            return "este archivo no existe"
+        }
+
+    }
+
+    delateProductById = async (id) => {
+        const productos = await this.getProduct()
+        const arrayNew = productos.filter((u) => u.id !==id)
+        console.log(arrayNew);
+        await fs.promises.writeFile(this.path,JSON.stringify(arrayNew))
+
+
+     }
+
+    #generarId = (productos) => {
+
         let id
         if (productos.length === 0) {
             id = 1
         } else {
             id = productos[productos.length - 1].id + 1
         }
+        return id
 
-        const nuevoProducto = { id, ...producto }
-        productos.push(nuevoProducto)
-
-        await fs.promises.writeFile(path, JSON.stringify(productos))
-        return nuevoProducto
     }
-
-    getProductoById = async () => { }
-
-    upDateProduc = async () => { }
-
-    delateProduct = async () => { }
-
 
 }
 
@@ -53,11 +85,17 @@ const productoCreado = {
     DESCR: "HHHHHH2"
 }
 
+
+
 async function prueba() {
-    const manager = new ProductManager()
+    const manager = new ProductManager("productos.json")
     // await manager.addProduct(productoCreado)
     const productos = await manager.getProduct()
     console.log(productos);
+    const productoid = await manager.getProductoById(3)
+    console.log(productoid);
+    // await manager.delateProduct()
+    
 }
 
 prueba()
