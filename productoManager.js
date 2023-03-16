@@ -43,7 +43,18 @@ class ProductManager {
 
     }
 
-    upDateProduc = async () => { }
+    upDateProduc = async (id, obj) => {
+        const productos = await this.getProduct()
+        const indexProductos = productos.findIndex((u) => u.id === id)
+        if (indexProductos === -1) {
+            return "no encontrado"
+        }
+
+        const productoActualizado = { ...productos[indexProductos], ...obj }
+        productos.splice(indexProductos, 1, productoActualizado)
+        await fs.promises.writeFile(this.path, JSON.stringify(productos))
+
+    }
 
     delateProduct = async () => {
         if (fs.existsSync(this.path)) {
@@ -57,12 +68,12 @@ class ProductManager {
 
     delateProductById = async (id) => {
         const productos = await this.getProduct()
-        const arrayNew = productos.filter((u) => u.id !==id)
+        const arrayNew = productos.filter((u) => u.id !== id)
         console.log(arrayNew);
-        await fs.promises.writeFile(this.path,JSON.stringify(arrayNew))
+        await fs.promises.writeFile(this.path, JSON.stringify(arrayNew))
 
 
-     }
+    }
 
     #generarId = (productos) => {
 
@@ -86,16 +97,15 @@ const productoCreado = {
 }
 
 
-
 async function prueba() {
     const manager = new ProductManager("productos.json")
-    // await manager.addProduct(productoCreado)
+    //await manager.addProduct(productoCreado)
     const productos = await manager.getProduct()
     console.log(productos);
-    const productoid = await manager.getProductoById(3)
-    console.log(productoid);
-    // await manager.delateProduct()
-    
+    // const productoid = await manager.getProductoById(3)
+    // console.log(productoid);
+    const n = await manager.upDateProduc(1, { title: "pantalon" })
+    console.log(n);
 }
 
 prueba()
